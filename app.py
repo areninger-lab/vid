@@ -29,7 +29,7 @@ app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
 # Job store (in-memory for this personal tool)
 jobs = {}
 
-def run_job(job_id, url, thickness, brightness, jitter, is_preview):
+def run_job(job_id, url, thickness, brightness, random_line_color, random_splotches, splotch_size, splotch_frequency, is_preview):
     try:
         logger.info(f"Starting job {job_id} (Preview: {is_preview}) for URL: {url}")
 
@@ -42,7 +42,9 @@ def run_job(job_id, url, thickness, brightness, jitter, is_preview):
         output_path = os.path.join(OUTPUT_FOLDER, output_filename)
 
         duration = 5 if is_preview else None
-        process_video(video_path, output_path, thickness, brightness, jitter, duration)
+        process_video(video_path, output_path, thickness, brightness,
+                      random_line_color, random_splotches,
+                      splotch_size, splotch_frequency, duration)
 
         if os.path.exists(output_path):
             jobs[job_id]['status'] = 'completed'
@@ -65,7 +67,10 @@ def submit():
     url = data.get('url')
     thickness = int(data.get('thickness', 1))
     brightness = float(data.get('brightness', 1.0))
-    jitter = int(data.get('jitter', 0))
+    random_line_color = bool(data.get('random_line_color', False))
+    random_splotches = bool(data.get('random_splotches', False))
+    splotch_size = int(data.get('splotch_size', 20))
+    splotch_frequency = int(data.get('splotch_frequency', 5))
     is_preview = data.get('preview', True)
 
     job_id = str(uuid.uuid4())
@@ -76,7 +81,11 @@ def submit():
         'created_at': time.time()
     }
 
-    thread = threading.Thread(target=run_job, args=(job_id, url, thickness, brightness, jitter, is_preview))
+    thread = threading.Thread(target=run_job, args=(
+        job_id, url, thickness, brightness,
+        random_line_color, random_splotches,
+        splotch_size, splotch_frequency, is_preview
+    ))
     thread.start()
 
     return jsonify({'job_id': job_id})

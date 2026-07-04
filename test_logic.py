@@ -8,12 +8,11 @@ def test_process_frame():
     frame = np.zeros((100, 100, 3), dtype=np.uint8)
     cv2.circle(frame, (50, 50), 30, (255, 255, 255), -1)
 
-    processed = process_frame(frame, thickness=1, brightness=1.0, jitter=0)
+    processed = process_frame(frame, thickness=1, brightness=1.0)
 
     assert processed.shape == (100, 100, 3)
-    # The output should be mostly white (255) with some black (0) for edges
-    assert np.any(processed == 0)
-    assert np.any(processed == 255)
+    # The output should have some lines (non-white pixels)
+    assert np.any(processed != 255)
     print("test_process_frame passed")
 
 def test_process_video():
