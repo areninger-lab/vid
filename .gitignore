@@ -1,0 +1,6 @@
+app.log
+flask.log
+data/
+__pycache__/
+*.pyc
+.DS_Store
