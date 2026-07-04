@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Stylizer</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="range"] { width: 100%; }
+        .controls { display: flex; gap: 20px; flex-wrap: wrap; }
+        .control-item { flex: 1; min-width: 150px; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        #status-container { margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; display: none; }
+        .slider-value { float: right; font-weight: normal; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Video Stylizer</h1>
+        <p>Transform YouTube videos into "Take On Me" style sketches.</p>
+
+        <div class="form-group">
+            <label for="url">YouTube URL</label>
+            <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=...">
+        </div>
+
+        <div class="controls">
+            <div class="control-item">
+                <label for="thickness">Line Thickness <span class="slider-value" id="thickness-val">1</span></label>
+                <input type="range" id="thickness" min="1" max="5" value="1">
+            </div>
+            <div class="control-item">
+                <label for="brightness">Brightness <span class="slider-value" id="brightness-val">1.0</span></label>
+                <input type="range" id="brightness" min="0.1" max="3.0" step="0.1" value="1.0">
+            </div>
+            <div class="control-item">
+                <label for="jitter">Jitteriness <span class="slider-value" id="jitter-val">0</span></label>
+                <input type="range" id="jitter" min="0" max="10" value="0">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+            <button id="btn-preview">Generate 5s Preview</button>
+        </div>
+
+        <div id="status-container">
+            <h3>Job Status: <span id="status-text">Queued</span></h3>
+            <p id="job-info"></p>
+            <div id="result-area"></div>
+        </div>
+    </div>
+
+    <script>
+        const sliders = ['thickness', 'brightness', 'jitter'];
+        sliders.forEach(id => {
+            const el = document.getElementById(id);
+            const val = document.getElementById(id + '-val');
+            el.oninput = () => val.innerText = el.value;
+        });
+
+        document.getElementById('btn-preview').onclick = async () => {
+            const url = document.getElementById('url').value;
+            if (!url) return alert('Please enter a YouTube URL');
+
+            const data = {
+                url,
+                thickness: document.getElementById('thickness').value,
+                brightness: document.getElementById('brightness').value,
+                jitter: document.getElementById('jitter').value,
+                preview: true
+            };
+
+            const response = await fetch('/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            pollStatus(result.job_id);
+        };
+
+        async function pollStatus(jobId) {
+            const statusContainer = document.getElementById('status-container');
+            const statusText = document.getElementById('status-text');
+            const resultArea = document.getElementById('result-area');
+            const jobInfo = document.getElementById('job-info');
+
+            statusContainer.style.display = 'block';
+            resultArea.innerHTML = '';
+            jobInfo.innerHTML = `Job ID: <a href="/job/${jobId}">${jobId}</a> (Save this link to return later)`;
+
+            const interval = setInterval(async () => {
+                const response = await fetch(`/status/${jobId}`);
+                const data = await response.json();
+
+                statusText.innerText = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+
+                if (data.status === 'completed') {
+                    clearInterval(interval);
+                    resultArea.innerHTML = `
+                        <h4>Preview Ready!</h4>
+                        <video width="100%" controls>
+                            <source src="/download/${data.output_file}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <br><br>
+                        <button id="btn-full">Process Full Video</button>
+                    `;
+                    document.getElementById('btn-full').onclick = () => processFull(jobId, data);
+                } else if (data.status === 'failed') {
+                    clearInterval(interval);
+                    statusText.innerText = 'Failed';
+                    resultArea.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                }
+            }, 2000);
+        }
+
+        async function processFull(oldJobId, oldData) {
+            // We need to resubmit but with preview: false
+            const url = document.getElementById('url').value;
+            const data = {
+                url,
+                thickness: document.getElementById('thickness').value,
+                brightness: document.getElementById('brightness').value,
+                jitter: document.getElementById('jitter').value,
+                preview: false
+            };
+
+            const response = await fetch('/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            pollStatus(result.job_id);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Status - Video Stylizer</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button { background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; text-decoration: none; display: inline-block; }
+        button:hover { background-color: #218838; }
+        .back-link { display: block; margin-bottom: 20px; color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Stylizer</a>
+        <h1>Job Status</h1>
+        <p><strong>Job ID:</strong> {{ job_id }}</p>
+        <div id="status-area">
+            <h3>Status: <span id="status-text">Loading...</span></h3>
+            <div id="result-area"></div>
+        </div>
+    </div>
+
+    <script>
+        const jobId = "{{ job_id }}";
+        const statusText = document.getElementById('status-text');
+        const resultArea = document.getElementById('result-area');
+
+        async function poll() {
+            const interval = setInterval(async () => {
+                const response = await fetch(`/status/${jobId}`);
+                if (response.status === 404) {
+                    statusText.innerText = 'Not Found (Job may have expired after 24h)';
+                    clearInterval(interval);
+                    return;
+                }
+                const data = await response.json();
+
+                statusText.innerText = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+
+                if (data.status === 'completed') {
+                    clearInterval(interval);
+                    resultArea.innerHTML = `
+                        <h4>Your video is ready!</h4>
+                        <video width="100%" controls>
+                            <source src="/download/${data.output_file}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <br><br>
+                        <a href="/download/${data.output_file}" download><button>Download MP4</button></a>
+                    `;
+                } else if (data.status === 'failed') {
+                    clearInterval(interval);
+                    statusText.innerText = 'Failed';
+                    resultArea.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                }
+            }, 3000);
+        }
+        poll();
+    </script>
+</body>
+</html>
