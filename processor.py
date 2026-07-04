@@ -36,13 +36,26 @@ def process_frame(frame, thickness=1, brightness=1.0, random_line_color=False, r
 
     result[edges > 0] = line_color
 
-    # Add random splotches
+    # Add random splotches (paint drips)
     if random_splotches:
-        for _ in range(splotch_frequency):
+        # Treat splotch_frequency as percentage chance per frame (0-100)
+        if random.randint(1, 100) <= splotch_frequency:
             center = (random.randint(0, width), random.randint(0, height))
-            radius = random.randint(1, splotch_size)
+            radius = random.randint(5, splotch_size)
             color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
+            # Main splotch
             cv2.circle(result, center, radius, color, -1)
+
+            # Draw a drip tail
+            drip_len = random.randint(1, 3)
+            curr_y = center[1]
+            curr_r = radius
+            for _ in range(drip_len):
+                curr_y += int(curr_r * 1.2)
+                curr_r = int(curr_r * 0.7)
+                if curr_y < height and curr_r > 1:
+                    cv2.circle(result, (center[0], curr_y), curr_r, color, -1)
 
     return result
 

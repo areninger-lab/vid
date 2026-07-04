@@ -115,3 +115,7 @@ Traceback (most recent call last):
     raise DownloadError(message, exc_info)
 yt_dlp.utils.DownloadError: ERROR: unable to download video data: HTTP Error 403: Forbidden
 2026-07-04 21:10:02,677 [INFO] 127.0.0.1 - - [04/Jul/2026 21:10:02] "GET /status/a235d506-3a83-4a70-a5ca-f5bb1c345255 HTTP/1.1" 200 -
+2026-07-04 21:32:51,810 [INFO]  * Detected change in '/app/processor.py', reloading
+2026-07-04 21:32:53,837 [INFO]  * Restarting with stat
+2026-07-04 21:32:54,887 [WARNING]  * Debugger is active!
+2026-07-04 21:32:54,889 [INFO]  * Debugger PIN: 631-326-424
