@@ -47,15 +47,29 @@ def process_frame(frame, thickness=1, brightness=1.0, random_line_color=False, r
             # Main splotch
             cv2.circle(result, center, radius, color, -1)
 
-            # Draw a drip tail
-            drip_len = random.randint(1, 3)
-            curr_y = center[1]
-            curr_r = radius
-            for _ in range(drip_len):
-                curr_y += int(curr_r * 1.2)
-                curr_r = int(curr_r * 0.7)
-                if curr_y < height and curr_r > 1:
-                    cv2.circle(result, (center[0], curr_y), curr_r, color, -1)
+            # Draw 1 or 2 drip tails
+            num_tails = random.randint(1, 2)
+            for _ in range(num_tails):
+                drip_len = random.randint(1, 4)
+                curr_pos = list(center)
+                curr_r = radius
+
+                # Pick a random direction (angle) for this tail
+                angle = random.uniform(0, 2 * np.pi)
+
+                for _ in range(drip_len):
+                    # Move in the chosen direction
+                    curr_r = int(curr_r * 0.7)
+                    if curr_r < 2: break
+
+                    dist = int(curr_r * 1.5)
+                    curr_pos[0] += int(dist * np.cos(angle))
+                    curr_pos[1] += int(dist * np.sin(angle))
+
+                    if 0 <= curr_pos[0] < width and 0 <= curr_pos[1] < height:
+                        cv2.circle(result, (curr_pos[0], curr_pos[1]), curr_r, color, -1)
+                    else:
+                        break
 
     return result
 
