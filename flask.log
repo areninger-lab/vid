@@ -12,3 +12,8 @@
 127.0.0.1 - - [04/Jul/2026 20:34:34] "POST /submit HTTP/1.1" 200 -
 ERROR: unable to download video data: HTTP Error 403: Forbidden
 127.0.0.1 - - [04/Jul/2026 20:34:36] "GET /status/24f2c5d9-428f-4ab6-ade4-8134ba1f7253 HTTP/1.1" 200 -
+ * Detected change in '/app/downloader.py', reloading
+Job 24f2c5d9-428f-4ab6-ade4-8134ba1f7253 failed: ERROR: unable to download video data: HTTP Error 403: Forbidden
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 631-326-424

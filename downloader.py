@@ -18,6 +18,7 @@ def download_youtube_video(url, download_dir='data/uploads'):
         'outtmpl': os.path.join(download_dir, f'{file_id}.%(ext)s'),
         'quiet': True,
         'no_warnings': True,
+        'nocheckcertificate': True,
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
