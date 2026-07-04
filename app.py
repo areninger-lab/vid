@@ -2,11 +2,23 @@ import os
 import time
 import threading
 import uuid
+import logging
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from downloader import download_youtube_video
 from processor import process_video
 
 app = Flask(__name__)
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # Configuration
 UPLOAD_FOLDER = 'data/uploads'
@@ -19,8 +31,11 @@ jobs = {}
 
 def run_job(job_id, url, thickness, brightness, jitter, is_preview):
     try:
+        logger.info(f"Starting job {job_id} (Preview: {is_preview}) for URL: {url}")
+
         jobs[job_id]['status'] = 'downloading'
         video_path = download_youtube_video(url, UPLOAD_FOLDER)
+        logger.info(f"Downloaded video for job {job_id} to {video_path}")
 
         jobs[job_id]['status'] = 'processing'
         output_filename = f"{job_id}.mp4"
@@ -29,12 +44,16 @@ def run_job(job_id, url, thickness, brightness, jitter, is_preview):
         duration = 5 if is_preview else None
         process_video(video_path, output_path, thickness, brightness, jitter, duration)
 
-        jobs[job_id]['status'] = 'completed'
-        jobs[job_id]['output_file'] = output_filename
+        if os.path.exists(output_path):
+            jobs[job_id]['status'] = 'completed'
+            jobs[job_id]['output_file'] = output_filename
+            logger.info(f"Completed job {job_id}. Output: {output_path}")
+        else:
+            raise Exception("Processing finished but output file was not found.")
     except Exception as e:
         jobs[job_id]['status'] = 'failed'
         jobs[job_id]['error'] = str(e)
-        print(f"Job {job_id} failed: {e}")
+        logger.error(f"Job {job_id} failed: {e}", exc_info=True)
 
 @app.route('/')
 def index():

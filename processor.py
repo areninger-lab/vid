@@ -48,38 +48,31 @@ def process_frame(frame, thickness=1, brightness=1.0, jitter=0):
 
     return result
 
+from moviepy import VideoFileClip
+
 def process_video(input_path, output_path, thickness=1, brightness=1.0, jitter=0, duration=None):
     """
-    Processes a video file.
-    If duration is set, only processes the first 'duration' seconds.
+    Processes a video file using moviepy for better codec compatibility.
     """
-    cap = cv2.VideoCapture(input_path)
-    if not cap.isOpened():
-        raise Exception(f"Error opening video file: {input_path}")
-
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    clip = VideoFileClip(input_path)
 
     if duration:
-        frames_to_process = int(fps * duration)
-    else:
-        frames_to_process = total_frames
+        clip = clip.subclipped(0, duration)
 
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+    def transform(get_frame, t):
+        frame = get_frame(t)
+        # MoviePy uses RGB, but our processor uses BGR (OpenCV default)
+        frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        processed_bgr = process_frame(frame_bgr, thickness, brightness, jitter)
+        # Convert back to RGB for MoviePy
+        return cv2.cvtColor(processed_bgr, cv2.COLOR_BGR2RGB)
 
-    count = 0
-    while cap.isOpened() and count < frames_to_process:
-        ret, frame = cap.read()
-        if not ret:
-            break
+    processed_clip = clip.transform(transform)
 
-        processed = process_frame(frame, thickness, brightness, jitter)
-        out.write(processed)
-        count += 1
+    # Use libx264 for wide browser compatibility
+    processed_clip.write_videofile(output_path, codec="libx264", audio=False, logger=None)
 
-    cap.release()
-    out.release()
+    clip.close()
+    processed_clip.close()
+
     return output_path
