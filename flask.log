@@ -1,11 +1,15 @@
  * Serving Flask app 'app'
  * Debug mode: on
-2026-07-05 10:49:32,213 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+2026-07-05 10:55:42,612 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:5005
  * Running on http://192.168.0.2:5005
-2026-07-05 10:49:32,213 [INFO] [33mPress CTRL+C to quit[0m
-2026-07-05 10:49:32,214 [INFO]  * Restarting with stat
-2026-07-05 10:49:33,641 [WARNING]  * Debugger is active!
-2026-07-05 10:49:33,642 [INFO]  * Debugger PIN: 631-326-424
-2026-07-05 10:50:02,729 [INFO] 127.0.0.1 - - [05/Jul/2026 10:50:02] "GET / HTTP/1.1" 200 -
+2026-07-05 10:55:42,612 [INFO] [33mPress CTRL+C to quit[0m
+2026-07-05 10:55:42,613 [INFO]  * Restarting with stat
+2026-07-05 10:55:43,961 [WARNING]  * Debugger is active!
+2026-07-05 10:55:43,962 [INFO]  * Debugger PIN: 631-326-424
+2026-07-05 10:55:47,252 [INFO] 127.0.0.1 - - [05/Jul/2026 10:55:47] "GET / HTTP/1.1" 200 -
+2026-07-05 10:56:16,054 [INFO]  * Detected change in '/app/processor.py', reloading
+2026-07-05 10:56:16,245 [INFO]  * Restarting with stat
+2026-07-05 10:56:17,644 [WARNING]  * Debugger is active!
+2026-07-05 10:56:17,645 [INFO]  * Debugger PIN: 631-326-424

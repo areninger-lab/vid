@@ -27,6 +27,10 @@ This application transforms YouTube videos into stylized pencil/charcoal sketche
    ```bash
    python3 -m pip install -r requirements.txt
    ```
+3. If you encounter errors installing `mediapipe` (required for Glowing Footprints), run the helper script:
+   ```bash
+   python3 setup_mediapipe.py
+   ```
 
 ## Running the Application
 1. Start the Flask server:

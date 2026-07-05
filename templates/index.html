@@ -65,7 +65,7 @@
                 <input type="checkbox" id="glowing-footprints" {% if not mediapipe_available %}disabled{% endif %}>
                 Glowing Footprints
                 {% if not mediapipe_available %}
-                <span style="color: #666; font-size: 0.85em; margin-left: 10px;">(AI support not available on this system)</span>
+                <span style="color: #d9534f; font-size: 0.85em; margin-left: 10px;">(Requires MediaPipe. Run <code>python3 setup_mediapipe.py</code> to install)</span>
                 {% endif %}
             </label>
         </div>
