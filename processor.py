@@ -1,8 +1,26 @@
 import cv2
 import numpy as np
 import random
+import mediapipe as mp
 
-def process_frame(frame, thickness=1, brightness=1.0, random_line_color=False, random_splotches=False, splotch_size=20, splotch_frequency=5, fg_mask=None):
+def get_footprint_color(age, duration):
+    """Fades Red -> Purple -> Blue"""
+    half = duration / 2
+    if age < half:
+        # Red to Purple
+        ratio = age / half
+        r = int(255 * (1 - ratio) + 128 * ratio)
+        g = 0
+        b = int(128 * ratio)
+    else:
+        # Purple to Blue
+        ratio = (age - half) / half
+        r = int(128 * (1 - ratio))
+        g = 0
+        b = int(128 * (1 - ratio) + 255 * ratio)
+    return (b, g, r) # BGR for OpenCV
+
+def process_frame(frame, thickness=1, brightness=1.0, random_line_color=False, random_splotches=False, splotch_size=20, splotch_frequency=5, fg_mask=None, footprint_history=None, current_time=0, footprint_duration=5):
     """
     Processes a single frame to apply a 'Take On Me' style sketch effect.
     """
@@ -40,6 +58,22 @@ def process_frame(frame, thickness=1, brightness=1.0, random_line_color=False, r
     if fg_mask is not None:
         # Static parts (fg_mask == 0) should be white
         result[fg_mask == 0] = [255, 255, 255]
+
+    # Add glowing footprints
+    if footprint_history is not None:
+        for t_f, pos in list(footprint_history):
+            age = current_time - t_f
+            if age > footprint_duration:
+                footprint_history.remove((t_f, pos))
+                continue
+
+            color = get_footprint_color(age, footprint_duration)
+            # Draw glow
+            cv2.circle(result, pos, 8, color, -1)
+            # Extra faint glow
+            overlay = result.copy()
+            cv2.circle(overlay, pos, 15, color, -1)
+            cv2.addWeighted(overlay, 0.4, result, 0.6, 0, result)
 
     # Add random splotches (paint drips)
     if random_splotches:
@@ -83,7 +117,8 @@ from moviepy import VideoFileClip
 def process_video(input_path, output_path, thickness=1, brightness=1.0,
                   random_line_color=False, random_splotches=False,
                   splotch_size=20, splotch_frequency=5,
-                  remove_background=False, duration=None):
+                  remove_background=False, glowing_footprints=False,
+                  footprint_duration=5, duration=None):
     """
     Processes a video file using moviepy for better codec compatibility.
     """
@@ -95,25 +130,42 @@ def process_video(input_path, output_path, thickness=1, brightness=1.0,
     # Initialize background subtractor if requested
     bg_subtractor = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=16, detectShadows=False) if remove_background else None
 
+    # Initialize MediaPipe Pose if requested
+    mp_pose = mp.solutions.pose.Pose(static_image_mode=False, min_detection_confidence=0.5) if glowing_footprints else None
+    footprint_history = [] if glowing_footprints else None
+
     def transform(get_frame, t):
         frame = get_frame(t)
         # MoviePy uses RGB, but our processor uses BGR (OpenCV default)
         frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        h, w = frame_bgr.shape[:2]
 
         fg_mask = None
         if bg_subtractor is not None:
-            # We need to apply the subtractor to all frames leading up to 't' to keep it synced
-            # However, MoviePy's transform(get_frame, t) can be called out of order.
-            # This is a limitation of using moviepy's transform for stateful OpenCV effects.
-            # For a better result, we might need to process frame-by-frame manually or accept some jitter in the mask.
             fg_mask = bg_subtractor.apply(frame_bgr)
-            # Simple noise removal on mask
             kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
             fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_OPEN, kernel)
 
+        if mp_pose is not None:
+            results = mp_pose.process(frame) # MediaPipe expects RGB
+            if results.pose_landmarks:
+                landmarks = results.pose_landmarks.landmark
+                # Landmarks for feet: 27, 28 (ankles), 29, 30 (heels), 31, 32 (toes)
+                for idx in [31, 32]: # Using toes for 'footprint' center
+                    lm = landmarks[idx]
+                    if lm.visibility > 0.5:
+                        pos = (int(lm.x * w), int(lm.y * h))
+                        # Only add if it's a new position (simple thresholding to avoid clusters)
+                        if not footprint_history or np.linalg.norm(np.array(pos) - np.array(footprint_history[-1][1])) > 10:
+                            footprint_history.append((t, pos))
+
         processed_bgr = process_frame(frame_bgr, thickness, brightness,
                                       random_line_color, random_splotches,
-                                      splotch_size, splotch_frequency, fg_mask=fg_mask)
+                                      splotch_size, splotch_frequency,
+                                      fg_mask=fg_mask,
+                                      footprint_history=footprint_history,
+                                      current_time=t,
+                                      footprint_duration=footprint_duration)
         # Convert back to RGB for MoviePy
         return cv2.cvtColor(processed_bgr, cv2.COLOR_BGR2RGB)
 

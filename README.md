@@ -3,11 +3,14 @@
 This application transforms YouTube videos into stylized pencil/charcoal sketches, inspired by the "Take On Me" music video. It is designed for personal use and runs locally on your CPU.
 
 ## Features
-- **YouTube Integration**: Download videos directly from a URL.
+- **YouTube Integration**: Download videos directly from a URL (supports SSL bypass for restricted environments).
 - **Adjustable Parameters**:
   - **Line Thickness**: Adjust the boldness of the sketch lines.
-  - **Brightness**: Lighten or darken the source video before processing.
-  - **Jitteriness**: Simulate the hand-drawn "vibration" effect.
+  - **Brightness**: Lighten or darken the source video.
+  - **Random Line Colors**: Toggle to make sketch lines colorful.
+  - **Random Color Splotches**: Add "paint drip" splatters with adjustable size and frequency.
+  - **Remove Static Background**: Remove anything that doesn't move, rendering it as plain white.
+  - **Glowing Footprints**: Track feet using AI and leave a glowing, color-fading trail (Red -> Purple -> Blue).
 - **Workflow**: Generate a 5-second preview to fine-tune your settings before processing the full video.
 - **Background Processing**: Jobs run in the background; you can return to a unique link to check status and download the result.
 
@@ -22,7 +25,7 @@ This application transforms YouTube videos into stylized pencil/charcoal sketche
 1. Clone or download this repository.
 2. Install the required Python packages:
    ```bash
-   python3 -m pip install flask yt-dlp opencv-python-headless numpy moviepy
+   python3 -m pip install flask yt-dlp opencv-python-headless numpy moviepy mediapipe
    ```
 
 ## Running the Application
@@ -36,12 +39,11 @@ This application transforms YouTube videos into stylized pencil/charcoal sketche
 ## How it Works
 1. **Downloader**: Uses `yt-dlp` to fetch the highest quality mp4 video stream.
 2. **Processor**:
-   - Converts frames to grayscale.
-   - Applies Canny edge detection.
-   - Inverts the result to get black lines on a white background.
-   - Adds "jitter" by slightly shifting the image and varying edge detection thresholds frame-by-frame.
+   - Uses OpenCV for grayscale conversion, Canny edge detection, and background subtraction.
+   - Uses **MediaPipe** for pose estimation to track foot movements.
+   - Uses **MoviePy** with the `libx264` codec to ensure videos play correctly in all web browsers.
 3. **Web UI**: Built with Flask and vanilla JavaScript for a simple, responsive experience.
 
 ## Technical Notes
-- **CPU Heavy**: Processing 10 minutes of video on a CPU may take some time (roughly 2-5x real-time depending on your processor).
-- **Storage**: Temporary files are stored in the `data/` directory.
+- **CPU Heavy**: Processing video with AI pose detection on a CPU is intensive. Previews are recommended.
+- **Storage**: Temporary files are stored in the `data/` directory and are ignored by git via `.gitignore`.

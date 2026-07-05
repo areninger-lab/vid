@@ -45,6 +45,10 @@
                 <label for="splotch-freq">Splotch Frequency (%) <span class="slider-value" id="splotch-freq-val">5</span></label>
                 <input type="range" id="splotch-freq" min="0" max="100" value="5">
             </div>
+            <div class="control-item">
+                <label for="footprint-duration">Footprint Duration (s) <span class="slider-value" id="footprint-duration-val">5</span></label>
+                <input type="range" id="footprint-duration" min="1" max="30" value="5">
+            </div>
         </div>
 
         <div class="form-group" style="margin-top: 20px;">
@@ -55,6 +59,9 @@
         </div>
         <div class="form-group">
             <label><input type="checkbox" id="remove-background"> Remove Static Background</label>
+        </div>
+        <div class="form-group">
+            <label><input type="checkbox" id="glowing-footprints"> Glowing Footprints</label>
         </div>
 
         <div class="form-group" style="margin-top: 20px;">
@@ -69,7 +76,7 @@
     </div>
 
     <script>
-        const sliders = ['thickness', 'brightness', 'splotch-size', 'splotch-freq'];
+        const sliders = ['thickness', 'brightness', 'splotch-size', 'splotch-freq', 'footprint-duration'];
         sliders.forEach(id => {
             const el = document.getElementById(id);
             const val = document.getElementById(id + '-val');
@@ -89,6 +96,8 @@
                 splotch_size: document.getElementById('splotch-size').value,
                 splotch_frequency: document.getElementById('splotch-freq').value,
                 remove_background: document.getElementById('remove-background').checked,
+                glowing_footprints: document.getElementById('glowing-footprints').checked,
+                footprint_duration: document.getElementById('footprint-duration').value,
                 preview: true
             };
 
@@ -149,6 +158,8 @@
                 splotch_size: document.getElementById('splotch-size').value,
                 splotch_frequency: document.getElementById('splotch-freq').value,
                 remove_background: document.getElementById('remove-background').checked,
+                glowing_footprints: document.getElementById('glowing-footprints').checked,
+                footprint_duration: document.getElementById('footprint-duration').value,
                 preview: false
             };
 
