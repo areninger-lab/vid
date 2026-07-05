@@ -1,7 +1,12 @@
 import cv2
 import numpy as np
 import random
-import mediapipe as mp
+
+try:
+    import mediapipe as mp
+    MEDIAPIPE_AVAILABLE = True
+except ImportError:
+    MEDIAPIPE_AVAILABLE = False
 
 def get_footprint_color(age, duration):
     """Fades Red -> Purple -> Blue"""
@@ -122,6 +127,9 @@ def process_video(input_path, output_path, thickness=1, brightness=1.0,
     """
     Processes a video file using moviepy for better codec compatibility.
     """
+    if glowing_footprints and not MEDIAPIPE_AVAILABLE:
+        raise Exception("Glowing footprints requires 'mediapipe' which is not installed or supported on this system.")
+
     clip = VideoFileClip(input_path)
 
     if duration:

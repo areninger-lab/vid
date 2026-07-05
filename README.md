@@ -25,7 +25,7 @@ This application transforms YouTube videos into stylized pencil/charcoal sketche
 1. Clone or download this repository.
 2. Install the required Python packages:
    ```bash
-   python3 -m pip install flask yt-dlp opencv-python-headless numpy moviepy mediapipe
+   python3 -m pip install -r requirements.txt
    ```
 
 ## Running the Application

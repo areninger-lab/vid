@@ -61,7 +61,13 @@
             <label><input type="checkbox" id="remove-background"> Remove Static Background</label>
         </div>
         <div class="form-group">
-            <label><input type="checkbox" id="glowing-footprints"> Glowing Footprints</label>
+            <label>
+                <input type="checkbox" id="glowing-footprints" {% if not mediapipe_available %}disabled{% endif %}>
+                Glowing Footprints
+                {% if not mediapipe_available %}
+                <span style="color: #666; font-size: 0.85em; margin-left: 10px;">(AI support not available on this system)</span>
+                {% endif %}
+            </label>
         </div>
 
         <div class="form-group" style="margin-top: 20px;">

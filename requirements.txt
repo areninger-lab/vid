@@ -1,0 +1,6 @@
+flask
+yt-dlp
+opencv-python-headless
+numpy
+moviepy
+mediapipe

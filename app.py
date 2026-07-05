@@ -5,7 +5,7 @@ import uuid
 import logging
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from downloader import download_youtube_video
-from processor import process_video
+from processor import process_video, MEDIAPIPE_AVAILABLE
 
 app = Flask(__name__)
 
@@ -61,7 +61,7 @@ def run_job(job_id, url, thickness, brightness, random_line_color, random_splotc
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', mediapipe_available=MEDIAPIPE_AVAILABLE)
 
 @app.route('/submit', methods=['POST'])
 def submit():

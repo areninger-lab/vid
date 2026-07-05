@@ -261,3 +261,24 @@ Traceback (most recent call last):
     raise DownloadError(message, exc_info)
 yt_dlp.utils.DownloadError: ERROR: unable to download video data: HTTP Error 403: Forbidden
 2026-07-05 10:36:49,602 [INFO] 127.0.0.1 - - [05/Jul/2026 10:36:49] "GET /status/b3fe437d-d3a7-4d5e-9107-d13bcb611a96 HTTP/1.1" 200 -
+2026-07-05 10:47:47,363 [INFO]  * Detected change in '/app/processor.py', reloading
+2026-07-05 10:47:48,082 [INFO]  * Restarting with stat
+2026-07-05 10:47:49,610 [WARNING]  * Debugger is active!
+2026-07-05 10:47:49,611 [INFO]  * Debugger PIN: 631-326-424
+2026-07-05 10:48:01,660 [INFO]  * Detected change in '/app/processor.py', reloading
+2026-07-05 10:48:01,908 [INFO]  * Restarting with stat
+2026-07-05 10:48:03,310 [WARNING]  * Debugger is active!
+2026-07-05 10:48:03,310 [INFO]  * Debugger PIN: 631-326-424
+2026-07-05 10:48:16,351 [INFO]  * Detected change in '/app/app.py', reloading
+2026-07-05 10:48:16,579 [INFO]  * Restarting with stat
+2026-07-05 10:48:17,941 [WARNING]  * Debugger is active!
+2026-07-05 10:48:17,942 [INFO]  * Debugger PIN: 631-326-424
+2026-07-05 10:49:32,213 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5005
+ * Running on http://192.168.0.2:5005
+2026-07-05 10:49:32,213 [INFO] [33mPress CTRL+C to quit[0m
+2026-07-05 10:49:32,214 [INFO]  * Restarting with stat
+2026-07-05 10:49:33,641 [WARNING]  * Debugger is active!
+2026-07-05 10:49:33,642 [INFO]  * Debugger PIN: 631-326-424
+2026-07-05 10:50:02,729 [INFO] 127.0.0.1 - - [05/Jul/2026 10:50:02] "GET / HTTP/1.1" 200 -
