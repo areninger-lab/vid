@@ -53,6 +53,9 @@
         <div class="form-group">
             <label><input type="checkbox" id="random-splotches"> Random Color Splotches</label>
         </div>
+        <div class="form-group">
+            <label><input type="checkbox" id="remove-background"> Remove Static Background</label>
+        </div>
 
         <div class="form-group" style="margin-top: 20px;">
             <button id="btn-preview">Generate 5s Preview</button>
@@ -85,6 +88,7 @@
                 random_splotches: document.getElementById('random-splotches').checked,
                 splotch_size: document.getElementById('splotch-size').value,
                 splotch_frequency: document.getElementById('splotch-freq').value,
+                remove_background: document.getElementById('remove-background').checked,
                 preview: true
             };
 
@@ -144,6 +148,7 @@
                 random_splotches: document.getElementById('random-splotches').checked,
                 splotch_size: document.getElementById('splotch-size').value,
                 splotch_frequency: document.getElementById('splotch-freq').value,
+                remove_background: document.getElementById('remove-background').checked,
                 preview: false
             };
 

@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import random
 
-def process_frame(frame, thickness=1, brightness=1.0, random_line_color=False, random_splotches=False, splotch_size=20, splotch_frequency=5):
+def process_frame(frame, thickness=1, brightness=1.0, random_line_color=False, random_splotches=False, splotch_size=20, splotch_frequency=5, fg_mask=None):
     """
     Processes a single frame to apply a 'Take On Me' style sketch effect.
     """
@@ -35,6 +35,11 @@ def process_frame(frame, thickness=1, brightness=1.0, random_line_color=False, r
         line_color = (0, 0, 0) # Black
 
     result[edges > 0] = line_color
+
+    # Apply foreground mask if provided (Background Removal)
+    if fg_mask is not None:
+        # Static parts (fg_mask == 0) should be white
+        result[fg_mask == 0] = [255, 255, 255]
 
     # Add random splotches (paint drips)
     if random_splotches:
@@ -77,7 +82,8 @@ from moviepy import VideoFileClip
 
 def process_video(input_path, output_path, thickness=1, brightness=1.0,
                   random_line_color=False, random_splotches=False,
-                  splotch_size=20, splotch_frequency=5, duration=None):
+                  splotch_size=20, splotch_frequency=5,
+                  remove_background=False, duration=None):
     """
     Processes a video file using moviepy for better codec compatibility.
     """
@@ -86,13 +92,28 @@ def process_video(input_path, output_path, thickness=1, brightness=1.0,
     if duration:
         clip = clip.subclipped(0, duration)
 
+    # Initialize background subtractor if requested
+    bg_subtractor = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=16, detectShadows=False) if remove_background else None
+
     def transform(get_frame, t):
         frame = get_frame(t)
         # MoviePy uses RGB, but our processor uses BGR (OpenCV default)
         frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+        fg_mask = None
+        if bg_subtractor is not None:
+            # We need to apply the subtractor to all frames leading up to 't' to keep it synced
+            # However, MoviePy's transform(get_frame, t) can be called out of order.
+            # This is a limitation of using moviepy's transform for stateful OpenCV effects.
+            # For a better result, we might need to process frame-by-frame manually or accept some jitter in the mask.
+            fg_mask = bg_subtractor.apply(frame_bgr)
+            # Simple noise removal on mask
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+            fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_OPEN, kernel)
+
         processed_bgr = process_frame(frame_bgr, thickness, brightness,
                                       random_line_color, random_splotches,
-                                      splotch_size, splotch_frequency)
+                                      splotch_size, splotch_frequency, fg_mask=fg_mask)
         # Convert back to RGB for MoviePy
         return cv2.cvtColor(processed_bgr, cv2.COLOR_BGR2RGB)
 

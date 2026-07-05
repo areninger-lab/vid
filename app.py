@@ -29,7 +29,7 @@ app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
 # Job store (in-memory for this personal tool)
 jobs = {}
 
-def run_job(job_id, url, thickness, brightness, random_line_color, random_splotches, splotch_size, splotch_frequency, is_preview):
+def run_job(job_id, url, thickness, brightness, random_line_color, random_splotches, splotch_size, splotch_frequency, remove_background, is_preview):
     try:
         logger.info(f"Starting job {job_id} (Preview: {is_preview}) for URL: {url}")
 
@@ -44,7 +44,8 @@ def run_job(job_id, url, thickness, brightness, random_line_color, random_splotc
         duration = 5 if is_preview else None
         process_video(video_path, output_path, thickness, brightness,
                       random_line_color, random_splotches,
-                      splotch_size, splotch_frequency, duration)
+                      splotch_size, splotch_frequency,
+                      remove_background, duration)
 
         if os.path.exists(output_path):
             jobs[job_id]['status'] = 'completed'
@@ -71,6 +72,7 @@ def submit():
     random_splotches = bool(data.get('random_splotches', False))
     splotch_size = int(data.get('splotch_size', 20))
     splotch_frequency = int(data.get('splotch_frequency', 5))
+    remove_background = bool(data.get('remove_background', False))
     is_preview = data.get('preview', True)
 
     job_id = str(uuid.uuid4())
@@ -84,7 +86,8 @@ def submit():
     thread = threading.Thread(target=run_job, args=(
         job_id, url, thickness, brightness,
         random_line_color, random_splotches,
-        splotch_size, splotch_frequency, is_preview
+        splotch_size, splotch_frequency,
+        remove_background, is_preview
     ))
     thread.start()
 
